@@ -4,46 +4,7 @@
 
 ## Part (a): Added DNL Code
 
-The following code was added below the `"Your code goes here"` marker in `hw2_dac.m`:
-
-```matlab
-%   calculate dnl
-for m=1:r
-  avg_width = (code(m, end)-code(m, 1))/(2^B-1);
-  % DNL(k) = [W(k+1) - W(k)] / avg_width - 1
-  dnl(m, :) = diff(code(m,:)) ./ avg_width - 1;
-end
-
-%   dnl scatter plot
-figure(3); clf; hold on;
-xlabel('Code');
-ylabel('DNL [LSB]');
-axis([0 2^B-2 -(dnlspec+0.05) (dnlspec+0.05)]);
-line([0 2^B-2], [dnlspec dnlspec], 'Color', 'r', 'LineWidth', 1.5);
-line([0 2^B-2], [-dnlspec -dnlspec], 'Color', 'r', 'LineWidth', 1.5);
-
-bad_dacs_dnl=0;
-for m=1:r
-  figure(3);
-  plot(0:2^B-2, dnl(m,:));
-  if find(abs(dnl(m,:))>dnlspec)
-      bad_dacs_dnl=bad_dacs_dnl+1;
-  end
-end
-
-figure(3); hold off;
-title(sprintf('DNL envelope of %d runs. %d bad DAC(s).', r, bad_dacs_dnl));
-
-%   dnl rms plot
-dnl_rms = sqrt(sum( dnl.^2, 1 ) ./r);
-[maxdnlrms, dmax] = max(dnl_rms);
-figure(4);
-plot(0:2^B-2, dnl_rms, dmax-1, maxdnlrms, '*');
-xlabel('Code');
-ylabel('DNL [LSB]');
-title(sprintf('RMS DNL of %d runs. (max=%1.3fLSBrms)', r, maxdnlrms));
-axis([0 2^B-2 0 maxdnlrms+0.01]);
-```
+DNL calculation and plotting code was added to `hw2_dac.m` below the `"Your code goes here"` marker. See the file for the added code.
 
 ## Part (b): INL and DNL Plots with Initial Design ($B_t = 3$, $A_{\text{unit}} = 14.75\;\mu\text{m}^2$)
 
