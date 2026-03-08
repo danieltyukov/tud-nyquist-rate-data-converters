@@ -13,6 +13,12 @@ Tp = [2e-9, 4e-9, 8e-9]; % Hold pulse widths [s]
 
 f = linspace(0, 500e6, 10000); % Frequency axis up to 500 MHz
 
+% Force light color scheme for proper export
+try
+    s = settings;
+    s.matlab.appearance.figure.GraphicsTheme.TemporaryValue = 'light';
+catch
+end
 set(0, 'DefaultFigureColor', 'w');
 set(0, 'DefaultAxesColor', 'w');
 set(0, 'DefaultAxesXColor', 'k');
@@ -31,22 +37,30 @@ for k = 1:length(Tp)
     h(k) = plot(f/1e6, envelope, 'Color', colors{k}, 'LineWidth', 2);
 end
 
-xlabel('Frequency [MHz]', 'FontSize', 12);
-ylabel('Amplitude Envelope |H_p(f)| / A', 'FontSize', 12);
-title('ZOH Reconstruction: Amplitude Envelope for Different Hold Pulse Widths', 'FontSize', 13);
-lgd1 = legend(h, {'T_p = 2 ns', 'T_p = 4 ns', 'T_p = 8 ns'}, 'Location', 'northeast', 'FontSize', 11);
-set(lgd1, 'Box', 'on', 'Color', 'w', 'EdgeColor', 'k', 'TextColor', 'k');
-lgd1.ItemTokenSize = [30, 18];
-% Force legend line colors to match plot
-drawnow;
-xlim([0 500]);
-ylim([0 1.1]);
-
 % Mark fs and 2*fs with explicit black lines and labels
 plot([fs/1e6 fs/1e6], [0 1.1], 'k--', 'LineWidth', 1, 'HandleVisibility', 'off');
 plot([2*fs/1e6 2*fs/1e6], [0 1.1], 'k--', 'LineWidth', 1, 'HandleVisibility', 'off');
 text(fs/1e6 + 2, 1.03, 'f_s = 125 MHz', 'FontSize', 9, 'Color', 'k');
 text(2*fs/1e6 + 2, 1.03, '2f_s = 250 MHz', 'FontSize', 9, 'Color', 'k');
+
+xlabel('Frequency [MHz]', 'FontSize', 12);
+ylabel('Amplitude Envelope |H_p(f)| / A', 'FontSize', 12);
+title('ZOH Reconstruction: Amplitude Envelope for Different Hold Pulse Widths', 'FontSize', 13);
+xlim([0 500]);
+ylim([0 1.1]);
+set(gca, 'Color', 'w', 'XColor', 'k', 'YColor', 'k');
+
+% Create legend last, after all plotting, with explicit handles
+lgd1 = legend(h, {'T_p = 2 ns', 'T_p = 4 ns', 'T_p = 8 ns'}, 'Location', 'northeast', 'FontSize', 11);
+set(lgd1, 'Box', 'on', 'Color', 'w', 'EdgeColor', 'k', 'TextColor', 'k');
+lgd1.ItemTokenSize = [30, 18];
+% Force legend icon colors to match plot lines
+drawnow;
+leg_icons = lgd1.EntryContainer.NodeChildren;
+for idx = 1:length(leg_icons)
+    icon_line = leg_icons(idx).Icon.Transform.Children.Children;
+    icon_line.ColorData = uint8(255*[colors{length(leg_icons)-idx+1}'; 1]);
+end
 
 exportgraphics(fig1, fullfile(savedir, 'p1a_amplitude_envelopes.png'), 'BackgroundColor', 'white', 'Resolution', 150);
 fprintf('Saved p1a_amplitude_envelopes.png\n');
@@ -108,18 +122,23 @@ for i = 1:length(tone_freqs)
         'FontSize', 9, 'Color', 'r');
 end
 
-xlabel('Frequency [MHz]', 'FontSize', 12);
-ylabel('Normalized Amplitude (to A)', 'FontSize', 12);
-title('Output Spectrum Tones for T_p = 8 ns (NRZ), f_{in} = 30 MHz', 'FontSize', 13);
-lgd2 = legend([h_env, h_stem], {'sinc envelope', 'Output tones'}, 'Location', 'northeast', 'FontSize', 11);
-set(lgd2, 'Color', 'w', 'EdgeColor', 'k', 'TextColor', 'k');
-xlim([0 260]);
-ylim([0 1.1]);
-
+% Mark fs and 2*fs
 plot([fs/1e6 fs/1e6], [0 1.1], 'k--', 'LineWidth', 1, 'HandleVisibility', 'off');
 plot([2*fs/1e6 2*fs/1e6], [0 1.1], 'k--', 'LineWidth', 1, 'HandleVisibility', 'off');
 text(fs/1e6 + 2, 1.03, 'f_s', 'FontSize', 9, 'Color', 'k');
 text(2*fs/1e6 + 2, 1.03, '2f_s', 'FontSize', 9, 'Color', 'k');
+
+xlabel('Frequency [MHz]', 'FontSize', 12);
+ylabel('Normalized Amplitude (to A)', 'FontSize', 12);
+title('Output Spectrum Tones for T_p = 8 ns (NRZ), f_{in} = 30 MHz', 'FontSize', 13);
+xlim([0 260]);
+ylim([0 1.1]);
+set(gca, 'Color', 'w', 'XColor', 'k', 'YColor', 'k');
+
+% Create legend last with explicit handles
+lgd2 = legend([h_env, h_stem], {'sinc envelope', 'Output tones'}, 'Location', 'northeast', 'FontSize', 11);
+set(lgd2, 'Color', 'w', 'EdgeColor', 'k', 'TextColor', 'k');
+lgd2.ItemTokenSize = [30, 18];
 
 exportgraphics(fig2, fullfile(savedir, 'p1b_output_tones.png'), 'BackgroundColor', 'white', 'Resolution', 150);
 fprintf('\nSaved p1b_output_tones.png\n');

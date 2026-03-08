@@ -4,8 +4,8 @@ clear all;
 
 % design choices 
 % YOU MUST MODIFY THESE TWO VALUES!
-Bt=1;         % Bt bits in unit element section
-Aunit=10;    % Unit element area in um^2
+Bt=3;         % Bt bits in thermometer section (from Problem 3)
+Aunit=140;   % Unit element area in um^2 (adjusted for 95% yield)
 
 % fixed parameters
 B=12;         % B bits total resolution
@@ -102,14 +102,41 @@ axis([0 2^B-1 0 maxinlrms+0.01]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Your code goes here
-
 %   only turn in the code below (no need to turn in the given code above)
 
 %   caculate dnl
+for m=1:r
+  avg_width = (code(m, end)-code(m, 1))/(2^B-1);
+  dnl(m, :) = diff(code(m,:)) ./ avg_width - 1;
+end
 
 %   dnl scatter plot
+figure(3); clf; hold on;
+xlabel('Code');
+ylabel('DNL [LSB]');
+axis([0 2^B-2 -(dnlspec+0.05) (dnlspec+0.05)]);
+line([0 2^B-2], [dnlspec dnlspec]);
+line([0 2^B-2], [-dnlspec -dnlspec]);
+
+bad_dacs_dnl=0;
+for m=1:r
+  figure(3);
+  plot(0:2^B-2, dnl(m,:));
+  if find(abs(dnl(m,:))>dnlspec)
+      bad_dacs_dnl=bad_dacs_dnl+1;
+  end
+end
+
+figure(3); hold off;
+title( sprintf('DNL envelope of %d runs. %d bad DAC(s).', r, bad_dacs_dnl));
 
 %   dnl rms plot
-
-
+dnl_rms = sqrt(sum( dnl.^2, 1 ) ./r);
+[maxdnlrms dmax] = max(dnl_rms);
+figure(4);
+plot(0:2^B-2, dnl_rms, dmax, maxdnlrms, '*');
+xlabel('Code');
+ylabel('DNL [LSB]');
+title( sprintf('RMS DNL of %d runs. (max=%1.3fLSBrms)', r, maxdnlrms));
+axis([0 2^B-2 0 maxdnlrms+0.01]);
 
